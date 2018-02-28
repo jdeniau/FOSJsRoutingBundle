@@ -77,10 +77,12 @@ class Controller
 
         $cache = new ConfigCache($this->exposedRoutesExtractor->getCachePath($request->getLocale()), $this->debug);
 
-        if (!$cache->isFresh()) {
+        if ($this->debug || !$cache->isFresh()) {
             $exposedRoutes    = $this->exposedRoutesExtractor->getRoutes();
             $serializedRoutes = $this->serializer->serialize($exposedRoutes, 'json');
-            $cache->write($serializedRoutes, $this->exposedRoutesExtractor->getResources());
+            if (!$this->debug) {
+                $cache->write($serializedRoutes, $this->exposedRoutesExtractor->getResources());
+            }
         } else {
             $path = method_exists($cache, 'getPath') ? $cache->getPath() : (string) $cache;
             $serializedRoutes = file_get_contents($path);
